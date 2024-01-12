@@ -59,6 +59,13 @@
 				"type": "module",
 				"manifest": "https://github.com/fantasycalendar/FoundryVTT-Sequencer/releases/latest/download/module.json"
 			}
+		],
+		"conflicts": [
+			{
+				"id": "foundry-summons",
+				"type": "module",
+				"manifest": "https://github.com/mrvauxs/foundry-summons/releases/latest/download/module.json"
+			}
 		]
 	},
 	"packs": [

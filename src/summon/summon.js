@@ -280,9 +280,9 @@ async function summon(data) {
 	}
 }
 
-window.hazardFoundrySummons = window.hazardFoundrySummons || {};
-window.hazardFoundrySummons = {
-	...(window.hazardFoundrySummons || {}),
+window.foundrySummons = window.foundrySummons || {};
+window.foundrySummons = {
+	...(window.foundrySummons || {}),
 	openMenu,
 	summon,
 	debug,

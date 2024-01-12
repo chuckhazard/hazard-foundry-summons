@@ -25,7 +25,7 @@ export default async function loadPacks(
 
 	packs = deduplicate(packs, (pack) => pack.id).map((pack) => customPackLookup[pack.id] ?? pack);
 
-	let index = window.hazardFoundrySummons.index ?? [];
+	let index = window.foundrySummons.index ?? [];
 
 	if (refresh || !reloadIndex) index = [];
 
@@ -118,13 +118,13 @@ export default async function loadPacks(
 
 	progress.close(localize('fs.notifications.loadingComplete'));
 
-	if (reloadIndex) window.hazardFoundrySummons.index = index;
+	if (reloadIndex) window.foundrySummons.index = index;
 	return index;
 }
 
-window.hazardFoundrySummons = window.hazardFoundrySummons || {};
-window.hazardFoundrySummons = {
-	...(window.hazardFoundrySummons || {}),
+window.foundrySummons = window.foundrySummons || {};
+window.foundrySummons = {
+	...(window.foundrySummons || {}),
 	loadPacks,
 	refresh: () => loadPacks(true),
 };
