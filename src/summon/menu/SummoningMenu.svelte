@@ -1,13 +1,16 @@
 <svelte:options accessors={true} />
 
 <script>
-	import * as systems from './options/index.js';
+	import * as columnDefs from './columns/index.js';
+	import Header from './Header.svelte';
+	import Row from './Row.svelte';
+	import FilterGroup from './FilterGroup.svelte';
+	import Filters from './Filters.svelte';
 	import { ApplicationShell } from '@typhonjs-fvtt/runtime/svelte/component/core';
 	import { writable } from 'svelte/store';
 	import loadPacks from './loadPacks.js';
 	import { debug, localize, moduleID, deduplicate } from '../../utils.js';
 	import defaultFilters from './defaultFilters.js';
-	import defaultSorting from './defaultSorting.js';
 	import { getContext } from 'svelte';
 	import { DocWrapper } from '../packs.js';
 	const { application } = getContext('#external');
@@ -22,22 +25,18 @@
 			location: null,
 			amount: { value: 1, locked: false },
 			filters: [],
-			sorting: [
-				{
-					name: localize('fs.menu.sort.alphabetical'),
-					function: (a, b) => a.name.localeCompare(b.name),
-				},
-			],
 			updates: undefined,
 			flags: undefined,
 			options: {
 				defaultFilters: true,
-				defaultSorting: true,
 				noAnimation: false,
 			},
 		},
 		ogData
 	);
+
+	// Apply default column defs or flag that custom template is in use.
+	if (!data.columns) data.columns = columnDefs[game.system.id] || columnDefs.none;
 
 	if (!data.creatures) {
 		data.creatures = loadPacks();
@@ -81,7 +80,7 @@
 			if (el instanceof CONFIG.Actor.documentClass) return new DocWrapper(el);
 
 			const actor = game.actors.get(el) || game.actors.getName(el);
-			if (!actor) throw Error('Foundry Summons | No actor found in provided arguments!');
+			if (!actor) throw Error('Hazard Foundry Summons | No actor found in provided arguments!');
 
 			return new DocWrapper(actor);
 		});
@@ -94,15 +93,11 @@
 		data.filters = deduplicate(data.filters, (filter) => filter.name);
 	}
 
-	if (data.options.defaultSorting) {
-		data.sorting.push(...defaultSorting());
-		data.sorting = deduplicate(data.sorting, (sort) => sort.name);
-	}
-
 	const token = writable(canvas.tokens.controlled[0] ?? data?.sourceTokens?.[0]);
 	const creature = writable();
 	const currentFilters = writable(data.filters ?? []);
-	const sort = writable(data.sorting[0]);
+	const filterGroups = writable(data.filterGroups ?? []);
+	const sort = writable({ column: data.columns[0], reverse: false });
 	const search = writable('');
 	const amount = writable(data.amount.value);
 
@@ -127,7 +122,7 @@
 			if (game.modules.get('sequencer')?.active)
 				crosshairShow = {
 					show: async (crosshair) => {
-						new Sequence('Foundry Summons')
+						new Sequence('Hazard Foundry Summons')
 							.effect()
 							.file(importedToken?.texture?.src ?? $creature.img)
 							.attachTo(crosshair)
@@ -180,8 +175,36 @@
 		new ImagePopout(actor.img, { title: actor.name, uuid: actor.uuid }).render(true);
 	}
 
-	function filterCreatures(creatures, filters, search) {
+	/**
+	 * Filter the creature list. If any of the group filters are true the creature is included.
+	 * If all filters are disabled, don't filter, unless flag specified.
+	 *
+	 * @param {Array} creatures List of creatures
+	 * @param {Object} group Object
+	 * @param {Array} group.filters	List of filter objects
+	 * @param {boolean} group.filterWhenDisabled If no filters are enabled, return an empty list.
+	 * @param {boolean} group.filters[].disabled Disabled filters are ignored.
+	 * @param {function} group.filters[].function Function should return true if creature should
+	 * 										      be included in results.
+	 */
+	function groupFilter(creatures, group) {
+		let filters = group.filters.filter((i) => !i.disabled);
+		if (filters.length) {
+			return creatures.filter((creature) => {
+				for (const filter of filters) {
+					if (!filter.disabled && filter.function(creature)) return true;
+				}
+			});
+		}
+		return group.filterWhenDisabled ? [] : creatures;
+	}
+
+	function filterCreatures(creatures, filters, filterGroups, search) {
 		let filtered = creatures.filter((x) => x.name.toLowerCase().includes(search.toLowerCase()));
+
+		for (const group of filterGroups) {
+			filtered = groupFilter(filtered, group);
+		}
 
 		filters
 			.filter((x) => !x.disabled || x.locked)
@@ -189,50 +212,32 @@
 				filtered = filter.function(filtered);
 			});
 
-		return filtered.sort((a, b) => $sort.function(a, b));
+		if ($sort.reverse) return filtered.sort($sort.column.compareFn).reverse();
+		else return filtered.sort($sort.column.compareFn);
 	}
 </script>
 
 <ApplicationShell bind:elementRoot>
 	<main>
 		<div>
-			{#if $currentFilters.length}
-				<div>
-					<p>{localize('fs.menu.currentFilters')}</p>
-					{#each $currentFilters
-						.sort((b, a) => a.locked ?? false - b.locked ?? false)
-						.filter((x) => !x.hidden) as filter}
-						<!-- svelte-ignore a11y-click-events-have-key-events -->
-						<div
-							class="option"
-							class:locked={filter.locked}
-							class:disabled={filter.disabled}
-							on:click={() => (!filter.locked ? (filter.disabled = !filter.disabled) : filter)}
-						>
-							{#if filter.locked}
-								<span class="fas fa-lock" />
-							{/if}
-							<span>
-								{@html filter.name}
-							</span>
-						</div>
+			{#if $filterGroups.length}
+				<div class="filter-wrapper">
+					<p>{localize('fs.menu.filterGroups')}</p>
+					{#each $filterGroups as group, i}
+						<span class="row">
+							<FilterGroup {filterGroups} {i} {currentFilters} />
+						</span>
 					{/each}
 				</div>
 			{/if}
-			<div>
-				<label for="sort">{localize('fs.menu.sortedBy')}</label>
-				<select
-					id="sort"
-					name="sort"
-					type="dropdown"
-					placeholder="Select the Sorting Method"
-					bind:value={$sort}
-				>
-					{#each data.sorting as method}
-						<option value={method}>{method.name}</option>
-					{/each}
-				</select>
-			</div>
+
+			{#if $currentFilters.length}
+				<div class="filter-wrapper">
+					<p>{localize('fs.menu.currentFilters')}</p>
+					<Filters {currentFilters} />
+				</div>
+			{/if}
+
 			<div>
 				<label for="token">{localize('fs.menu.summonToken')}</label>
 				<select id="token" name="token" type="dropdown" placeholder="Select a Token" bind:value={$token}>
@@ -253,38 +258,44 @@
 			<div class="search">
 				<input type="text" bind:value={$search} />
 			</div>
-			<div>
-				<ul>
-					{#await data.creatures}
-						<p>{localize('fs.menu.loading')}</p>
-					{:then creatures}
-						{@const filteredCreatures = filterCreatures(creatures, $currentFilters, $search)}
-						{#if filteredCreatures.length === 0}
-							<p>{localize('fs.menu.nothing')}</p>
-						{:else}
-							{#each filteredCreatures as opt}
-								<li>
+
+			<div class="creatures">
+				<table>
+					<Header columns={data.columns} {sort} {localize} />
+					<tbody>
+						{#await data.creatures}
+							<tr><td colspan={data.columns.length + 1}><p>{localize('fs.menu.loading')}</p></td></tr>
+						{:then creatures}
+							{@const filteredCreatures = filterCreatures(
+								creatures,
+								$currentFilters,
+								$filterGroups,
+								$search,
+								$sort
+							)}
+							{#if filteredCreatures.length === 0}
+								<tr><td colspan={data.columns.length + 1}> <p>{localize('fs.menu.nothing')}</p></td></tr
+								>
+							{:else}
+								{#each filteredCreatures as opt}
 									<!-- svelte-ignore a11y-click-events-have-key-events -->
-									<div
+									<tr
 										class="option"
 										class:selected={$creature?.id === opt.id}
 										on:click={() => ($creature = opt)}
 										on:dblclick={() => send() && application.close()}
 									>
 										<!-- svelte-ignore missing-declaration -->
-										<svelte:component
-											this={systems[game.system.id] ? systems[game.system.id] : systems.none}
-											creature={opt}
-											{openImage}
-										/>
-									</div>
-								</li>
-							{/each}
-						{/if}
-					{:catch error}
-						<p>{localize('fs.menu.error', { error: error.message })}</p>
-					{/await}
-				</ul>
+
+										<Row creature={opt} columns={data.columns} {openImage} />
+									</tr>
+								{/each}
+							{/if}
+						{:catch error}
+							<p>{localize('fs.menu.error', { error: error.message })}</p>
+						{/await}
+					</tbody>
+				</table>
 			</div>
 		</div>
 	</main>
@@ -305,6 +316,30 @@
 </ApplicationShell>
 
 <style lang="scss">
+	.filter-wrapper {
+		display: grid;
+		grid-template-columns: max-content 1fr;
+		row-gap: 2px;
+		border: none;
+		padding: 0 5px 10px 5px;
+	}
+
+	.filter-wrapper p {
+		grid-column: span 2;
+	}
+
+	.filter-wrapper .row {
+		display: grid;
+		row-gap: 5px;
+		column-gap: 5px;
+		background-color: rgb(0, 0, 0, 0.1);
+		margin: 2px 0;
+		padding: 5px;
+		border-radius: 0.25rem;
+		grid-template-columns: subgrid;
+		grid-column: span 2;
+	}
+
 	input,
 	select {
 		margin: 0.25rem;
@@ -334,19 +369,29 @@
 		}
 	}
 
+	.creatures {
+		width: 100%;
+		overflow-y: scroll;
+		box-shadow: 0 0 0 0;
+		margin: 0;
+		padding: 0;
+		border-radius: 0;
+	}
+
+	.creatures table {
+		border-collapse: collapse; /* make the table borders collapse to each other */
+		width: 100%;
+		padding: 0;
+		margin: 0;
+	}
+
 	.option {
 		position: relative;
 		height: 100%;
 		box-shadow: revert;
-		&.locked {
-			opacity: 0.6;
-		}
 
 		&:hover {
 			box-shadow: inset 0 0 0 200px #006cc41c;
-			&.locked {
-				box-shadow: none;
-			}
 		}
 	}
 
@@ -378,14 +423,6 @@
 		margin: 0.25rem;
 		border-radius: 0.25rem;
 
-		&.option {
-			-ms-overflow-style: none;
-			scrollbar-width: none;
-			&::-webkit-scrollbar {
-				display: none;
-			}
-		}
-
 		& > div {
 			box-shadow: 0 0 0.125rem 0.125rem rgba(0, 0, 0, 0.25);
 			margin: 0.25rem;
@@ -406,19 +443,5 @@
 		}
 	}
 
-	ul {
-		list-style: none;
-		padding: 0;
-		margin: 0;
-		li {
-			height: 40px;
-			background: rgba(255, 255, 255, 0.25);
-			&:nth-child(odd) {
-				background: none;
-			}
-			&:last-child {
-				margin-bottom: 0.25rem;
-			}
-		}
-	}
+	@import 'style/styles.css';
 </style>

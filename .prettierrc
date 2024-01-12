@@ -12,6 +12,7 @@
 	"pluginSearchDirs": ["."],
 	"plugins": ["svelte", "prettier-plugin-svelte"],
 	"printWidth": 120,
+	"endOfLine": "lf",
 	"semi": true,
 	"singleQuote": true,
 	"svelteAllowShorthand": true,

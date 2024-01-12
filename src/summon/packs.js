@@ -14,11 +14,11 @@ export class DocWrapper {
 		this.valid = true;
 		if (!this.name) {
 			this.valid = false;
-			ui.notifications.error('Foundry Summons | Error loading pack index. An entry is missing a name!');
+			ui.notifications.error('Hazard Foundry Summons | Error loading pack index. An entry is missing a name!');
 		}
 		if (!this.uuid) {
 			this.valid = false;
-			ui.notifications.error('Foundry Summons | Error loading pack index. An entry is missing a uuid!');
+			ui.notifications.error('Hazard Foundry Summons | Error loading pack index. An entry is missing a uuid!');
 		}
 		if (!this.valid) {
 			return console.log(this);
@@ -39,7 +39,7 @@ export class DocWrapper {
 	}
 }
 
-CONFIG.FoundrySummons = {
+CONFIG.HazardFoundrySummons = {
 	docWrapperClasses: {
 		DocWrapper,
 	},
@@ -47,6 +47,6 @@ CONFIG.FoundrySummons = {
 };
 
 Hooks.once('ready', () => {
-	Hooks.callAll('fs-addWrapperClasses', CONFIG.FoundrySummons.docWrapperClasses);
-	Hooks.callAll('fs-addCustomPacks', CONFIG.FoundrySummons.customPacks);
+	Hooks.callAll('fs-addWrapperClasses', CONFIG.HazardFoundrySummons.docWrapperClasses);
+	Hooks.callAll('fs-addCustomPacks', CONFIG.HazardFoundrySummons.customPacks);
 });

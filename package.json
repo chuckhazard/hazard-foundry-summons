@@ -2,9 +2,10 @@
 	"license": "MIT",
 	"private": true,
 	"type": "module",
-	"author": "MrVauxs",
+	"author": "Chuckhazard",
 	"contributors": [
-		"MrVauxs"
+		"MrVauxs",
+		"Chuckhazard"
 	],
 	"dependencies": {
 		"@typhonjs-fvtt/runtime": "^0.0.23",

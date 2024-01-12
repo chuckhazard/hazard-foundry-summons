@@ -14,7 +14,7 @@ import { postcssConfig, terserConfig } from '@typhonjs-fvtt/runtime/rollup';
 
 // For convenience, you just need to modify the package ID below as it is used to fill in default proxy settings for
 // the dev server.
-const s_PACKAGE_ID = 'modules/foundry-summons';
+const s_PACKAGE_ID = 'modules/hazard-foundry-summons';
 
 // A short additional string to add to Svelte CSS hash values to make yours unique. This reduces the amount of
 // duplicated framework CSS overlap between many TRL packages enabled on Foundry VTT at the same time. 'tse' is chosen
@@ -59,17 +59,17 @@ export default () => {
 		// resources served with this particular Vite configuration. Modify the proxy rule as necessary for your
 		// static resources / project.
 		server: {
-			port: 30011,
+			port: 30001,
 			open: '/game',
 			proxy: {
 				// Serves static files from main Foundry server.
-				[`^(/${s_PACKAGE_ID}/(assets|lang|packs|style.css))`]: 'http://127.0.0.1:30001',
+				[`^(/${s_PACKAGE_ID}/(assets|lang|packs|style.css))`]: 'http://127.0.0.1:30000',
 
 				// All other paths besides package ID path are served from main Foundry server.
-				[`^(?!/${s_PACKAGE_ID}/)`]: 'http://127.0.0.1:30001',
+				[`^(?!/${s_PACKAGE_ID}/)`]: 'http://127.0.0.1:30000',
 
 				// Enable socket.io from main Foundry server.
-				'/socket.io': { target: 'ws://127.0.0.1:30001', ws: true },
+				'/socket.io': { target: 'ws://127.0.0.1:30000', ws: true },
 			},
 		},
 

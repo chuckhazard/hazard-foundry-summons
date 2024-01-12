@@ -7,11 +7,11 @@ import { moduleID, debug } from '../../utils';
  * @returns {Promise<boolean>} Returns true once the actors are created.
  */
 export default async function createBlanks(defaultToken) {
-	debug('Foundry Summons | System not supported. Using default blank template.');
+	debug('Hazard Foundry Summons | System not supported. Using default blank template.');
 	let npcFolder = game.folders.get(game.settings.get(moduleID, 'hiddenFolder'));
 
 	if (!npcFolder) {
-		npcFolder = await Folder.create({ name: 'Foundry Summons Blank Actors', type: 'Actor', parent: null });
+		npcFolder = await Folder.create({ name: 'Hazard Foundry Summons Blank Actors', type: 'Actor', parent: null });
 		game.settings.set(moduleID, 'hiddenFolder', npcFolder.id);
 	}
 

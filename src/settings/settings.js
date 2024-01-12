@@ -14,7 +14,7 @@ Hooks.once('init', () => {
 		options: {
 			scope: 'world',
 			config: true,
-			name: 'foundry-summons.settings.debug.title',
+			name: 'hazard-foundry-summons.settings.debug.title',
 			type: Boolean,
 			default: false,
 		},
@@ -113,7 +113,7 @@ Hooks.once('init', () => {
 
 Hooks.once('ready', () => {
 	if (game.settings.get(moduleID, 'sources').includes('none')) {
-		console.log('Foundry Summons | Selecting default sources');
+		console.log('Hazard Foundry Summons | Selecting default sources');
 		selectDefaultSources();
 	}
 
@@ -121,8 +121,8 @@ Hooks.once('ready', () => {
 	createBlanks();
 
 	gameSettings.getStore('sources').subscribe(() => {
-		if (window.foundrySummons?.index?.length) {
-			console.log('Foundry Summons | Updating Index');
+		if (window.hazardFoundrySummons?.index?.length) {
+			console.log('Hazard Foundry Summons | Updating Index');
 			loadPacks(true);
 		}
 	});
@@ -141,5 +141,5 @@ Hooks.on('renderActorDirectory', (app, html) => {
 	}
 });
 
-window.foundrySummons = window.foundrySummons || {};
-window.foundrySummons.gameSettings = gameSettings;
+window.hazardFoundrySummons = window.hazardFoundrySummons || {};
+window.hazardFoundrySummons.gameSettings = gameSettings;

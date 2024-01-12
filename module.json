@@ -1,7 +1,7 @@
 {
-	"title": "Foundry Summons",
-	"id": "foundry-summons",
-	"description": "A Summoning Module.",
+	"title": "Hazard Foundry Summons",
+	"id": "hazard-foundry-summons",
+	"description": "Foundry Summons fork with customizations",
 	"version": "To Be Replaced",
 	"esmodules": [
 		"index.js"
@@ -12,12 +12,7 @@
 	"socket": true,
 	"authors": [
 		{
-			"discord": "MrVauxs#8622",
-			"email": "mrvauxs@gmail.com",
-			"ko-fi": "MrVauxs",
-			"name": "MrVauxs",
-			"patreon": "MrVauxs",
-			"twitter": "@ThatVauxs"
+			"name": "Chuckhazard"
 		}
 	],
 	"flags": {
@@ -31,15 +26,15 @@
 		{
 			"type": "setup",
 			"name": "Setup Screen",
-			"url": "modules/foundry-summons/assets/setup.webp"
+			"url": "modules/hazard-foundry-summons/assets/setup.webp"
 		}
 	],
 	"compatibility": {
 		"minimum": "11",
 		"verified": "11"
 	},
-	"manifest": "https://github.com/mrvauxs/foundry-summons/releases/latest/download/module.json",
-	"download": "https://github.com/mrvauxs/foundry-summons/releases/latest/download/module.zip",
+	"manifest": "https://github.com/chuckhazard/hazard-foundry-summons/releases/latest/download/module.json",
+	"download": "https://github.com/chuckhazard/hazard-foundry-summons/releases/latest/download/module.zip",
 	"languages": [
 		{
 			"lang": "en",
@@ -69,17 +64,16 @@
 	"packs": [
 		{
 			"name": "macros",
-			"label": "Foundry Summons Macros",
+			"label": "Hazard Foundry Summons Macros",
 			"path": "packs/macros",
 			"type": "Macro",
-			"banner": "modules/foundry-summons/assets/banner.webp",
+			"banner": "modules/hazard-foundry-summons/assets/banner.webp",
 			"ownership": {
 				"PLAYER": "OWNER"
 			}
 		}
 	],
-	"readme": "https://github.com/mrvauxs/foundry-summons/blob/master/README.md",
-	"url": "https://github.com/mrvauxs/foundry-summons",
-	"bugs": "https://github.com/mrvauxs/foundry-summons/issues",
-	"changelog": "https://github.com/mrvauxs/foundry-summons/releases/latest/"
+	"readme": "https://github.com/chuckhazard/hazard-foundry-summons/blob/master/README.md",
+	"url": "https://github.com/chuckhazard/hazard-foundry-summons",
+	"changelog": "https://github.com/chuckhazard/hazard-foundry-summons/releases/latest/"
 }

@@ -5,7 +5,7 @@ import SummoningMenu from './SummoningMenu.svelte';
 export default class SummoningApplication extends SvelteApplication {
 	static get defaultOptions() {
 		return foundry.utils.mergeObject(super.defaultOptions, {
-			title: 'foundry-summons.menu.title',
+			title: 'hazard-foundry-summons.menu.title',
 			width: 800,
 			height: 600,
 			svelte: {

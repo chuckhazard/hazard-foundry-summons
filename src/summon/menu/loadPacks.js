@@ -21,11 +21,11 @@ export default async function loadPacks(
 	const progress = new Progress({ steps: packs.length });
 
 	const customPackLookup = {};
-	CONFIG.FoundrySummons.customPacks.forEach((pack) => (customPackLookup[pack.id] = pack));
+	CONFIG.HazardFoundrySummons.customPacks.forEach((pack) => (customPackLookup[pack.id] = pack));
 
 	packs = deduplicate(packs, (pack) => pack.id).map((pack) => customPackLookup[pack.id] ?? pack);
 
-	let index = window.foundrySummons.index ?? [];
+	let index = window.hazardFoundrySummons.index ?? [];
 
 	if (refresh || !reloadIndex) index = [];
 
@@ -35,7 +35,7 @@ export default async function loadPacks(
 		const packData = pack.getIndex ? pack : game.packs.get(pack.id);
 		if (!packData) {
 			debug(
-				`Foundry Summons | ${localize('fs.notifications.error.loadingPack', {
+				`Hazard Foundry Summons | ${localize('fs.notifications.error.loadingPack', {
 					pack: pack.id ?? pack.label ?? pack.title ?? pack.name,
 				})}`
 			);
@@ -105,7 +105,7 @@ export default async function loadPacks(
 
 		packIndex = packIndex.map((indexItem) =>
 			indexItem.docType
-				? new CONFIG.FoundrySummons.docWrapperClasses[indexItem.docType](indexItem)
+				? new CONFIG.HazardFoundrySummons.docWrapperClasses[indexItem.docType](indexItem)
 				: new DocWrapper(indexItem)
 		);
 
@@ -118,13 +118,13 @@ export default async function loadPacks(
 
 	progress.close(localize('fs.notifications.loadingComplete'));
 
-	if (reloadIndex) window.foundrySummons.index = index;
+	if (reloadIndex) window.hazardFoundrySummons.index = index;
 	return index;
 }
 
-window.foundrySummons = window.foundrySummons || {};
-window.foundrySummons = {
-	...(window.foundrySummons || {}),
+window.hazardFoundrySummons = window.hazardFoundrySummons || {};
+window.hazardFoundrySummons = {
+	...(window.hazardFoundrySummons || {}),
 	loadPacks,
 	refresh: () => loadPacks(true),
 };

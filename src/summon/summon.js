@@ -1,4 +1,4 @@
-import { debug, localize, moduleID } from '../utils';
+import { columnDefinition, debug, localize, moduleID } from '../utils';
 import { openMenu } from './menu/SummoningMenu.js';
 
 /**
@@ -52,10 +52,10 @@ Hooks.on('ready', () => {
  */
 async function summon(data) {
 	if (!game.user.isGM)
-		return ui.notifications.error(`Foundry Summons | ${localize('fs.notifications.error.permission')}`);
+		return ui.notifications.error(`Hazard Foundry Summons | ${localize('fs.notifications.error.permission')}`);
 	debug('Received', data);
 
-	const ClassDocWrapper = CONFIG.FoundrySummons.docWrapperClasses[data.creatureActor.docType];
+	const ClassDocWrapper = CONFIG.HazardFoundrySummons.docWrapperClasses[data.creatureActor.docType];
 	if (!ClassDocWrapper)
 		throw new Error(localize('fs.notifications.error.docType', { docType: data.creatureActor.docType }));
 
@@ -94,10 +94,10 @@ async function summon(data) {
 		const npcs = game.settings.get(moduleID, 'blankNPC');
 		actorName = fromUuidSync(`Actor.${npcs.find((blank) => blank.type === actorData.type).id}`).name;
 	} catch (error) {
-		ui.notifications.error(`Foundry Summons | ${localize('fs.notifications.error.blanks')}`);
+		ui.notifications.error(`Hazard Foundry Summons | ${localize('fs.notifications.error.blanks')}`);
 	}
 	if (!actorName) {
-		ui.notifications.error(`Foundry Summons | ${localize('fs.notifications.error.blanks')}`);
+		ui.notifications.error(`Hazard Foundry Summons | ${localize('fs.notifications.error.blanks')}`);
 		return;
 	}
 	let actor = actorData;
@@ -110,7 +110,7 @@ async function summon(data) {
 	}
 
 	Object.assign(token.flags, {
-		'foundry-summons': {
+		'hazard-foundry-summons': {
 			scrollingText: game.settings.get('core', 'scrollingStatusText'),
 			bloodsplatter: game.modules.get('splatter')?.active
 				? game.settings.get('splatter', 'enableBloodsplatter')
@@ -158,17 +158,17 @@ async function summon(data) {
 		},
 		post: async function (_location, _spawnedTokenDoc, _updates, _iteration) {
 			// Remove scrolling text if effects or hp are modified.
-			if (updates.token.flags['foundry-summons']?.scrollingText) {
+			if (updates.token.flags['hazard-foundry-summons']?.scrollingText) {
 				await game.settings.set('core', 'scrollingStatusText', true);
 			}
 
 			// If hp is modified, don't splatter all over the token.
-			if (updates.token.flags['foundry-summons']?.bloodsplatter) {
+			if (updates.token.flags['hazard-foundry-summons']?.bloodsplatter) {
 				await game.settings.set('splatter', 'enableBloodsplatter', true);
 			}
 
 			// If the token is modified, don't change the name.
-			if (updates.token.flags['foundry-summons']?.tokenmold) {
+			if (updates.token.flags['hazard-foundry-summons']?.tokenmold) {
 				await game.settings.set('Token-Mold', 'everyone', {
 					...game.settings.get('Token-Mold', 'everyone'),
 					...{ name: { use: true } },
@@ -186,7 +186,7 @@ async function summon(data) {
 							});
 						}, 250);
 
-						console.log('Foundry Summons | Used default summoning animation.');
+						console.log('Hazard Foundry Summons | Used default summoning animation.');
 					}
 				});
 			}
@@ -269,8 +269,8 @@ async function summon(data) {
 
 		return results;
 	} catch (error) {
-		ui.notifications.error(`Foundry Summons | ${localize('fs.notifications.error.summon')}`);
-		console.log(`Foundry Summons | ${localize('fs.notifications.error.summon')}`, {
+		ui.notifications.error(`Hazard Foundry Summons | ${localize('fs.notifications.error.summon')}`);
+		console.log(`Hazard Foundry Summons | ${localize('fs.notifications.error.summon')}`, {
 			actorName,
 			updates,
 			callbacks,
@@ -280,10 +280,11 @@ async function summon(data) {
 	}
 }
 
-window.foundrySummons = window.foundrySummons || {};
-window.foundrySummons = {
-	...(window.foundrySummons || {}),
+window.hazardFoundrySummons = window.hazardFoundrySummons || {};
+window.hazardFoundrySummons = {
+	...(window.hazardFoundrySummons || {}),
 	openMenu,
 	summon,
 	debug,
+	columnDefinition,
 };

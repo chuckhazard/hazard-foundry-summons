@@ -1,5 +1,5 @@
 {
-	"foundry-summons": {
+	"hazard-foundry-summons": {
 		"menu": {
 			"title": "Pick a Creature",
 			"onlyImages": "Only Creatures with Images",
@@ -19,6 +19,7 @@
 					}
 				}
 			},
+			"filterGroups": "Current filter sets:",
 			"currentFilters": "Current filters affecting your summon selection:",
 			"sortedBy": "Sorted by:",
 			"summonToken": "Select the Summoning Token:",
@@ -27,7 +28,14 @@
 			"nothing": "No Creatures Found! Refine your search filters or sources.",
 			"error": "Something went wrong: {error}",
 			"summon": "Summon {number} {creature}",
-			"summonAndClose": "Summon {number} {creature} and Close"
+			"summonAndClose": "Summon {number} {creature} and Close",
+			"columnRequired": "Custom row template requires column data",
+			"headers": {
+				"image": "Image",
+				"name": "Name",
+				"level": "Level",
+				"cr": "CR"
+			}
 		},
 		"dialog": {
 			"title": "Summoning Request",
