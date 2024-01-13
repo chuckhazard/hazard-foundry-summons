@@ -11,7 +11,7 @@
 	const autoAccept = gameSettings.getStore('autoAccept');
 	const additionalIndexFields = gameSettings.getStore('additionalIndexFields');
 	const packs = [
-		...CONFIG.FoundrySummons.customPacks,
+		...CONFIG.HazardFoundrySummons.customPacks,
 		...game.packs.contents.filter((pack) => pack.metadata.type === 'Actor').map((pack) => pack.metadata),
 	];
 

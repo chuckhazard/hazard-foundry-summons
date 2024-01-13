@@ -280,9 +280,9 @@ async function summon(data) {
 	}
 }
 
-window.foundrySummons = window.foundrySummons || {};
-window.foundrySummons = {
-	...(window.foundrySummons || {}),
+window.hfSummons = window.hfSummons || {};
+window.hfSummons = {
+	...(window.hfSummons || {}),
 	openMenu,
 	summon,
 	debug,

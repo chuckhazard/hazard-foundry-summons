@@ -121,7 +121,7 @@ Hooks.once('ready', () => {
 	createBlanks();
 
 	gameSettings.getStore('sources').subscribe(() => {
-		if (window.hazardFoundrySummons?.index?.length) {
+		if (window.hfSummons?.index?.length) {
 			console.log('Hazard Foundry Summons | Updating Index');
 			loadPacks(true);
 		}
@@ -141,5 +141,5 @@ Hooks.on('renderActorDirectory', (app, html) => {
 	}
 });
 
-window.hazardFoundrySummons = window.hazardFoundrySummons || {};
-window.hazardFoundrySummons.gameSettings = gameSettings;
+window.hfSummons = window.hfSummons || {};
+window.hfSummons.gameSettings = gameSettings;
