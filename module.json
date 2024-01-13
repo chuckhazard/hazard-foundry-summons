@@ -68,18 +68,6 @@
 			}
 		]
 	},
-	"packs": [
-		{
-			"name": "macros",
-			"label": "Hazard Foundry Summons Macros",
-			"path": "packs/macros",
-			"type": "Macro",
-			"banner": "modules/hazard-foundry-summons/assets/banner.webp",
-			"ownership": {
-				"PLAYER": "OWNER"
-			}
-		}
-	],
 	"readme": "https://github.com/chuckhazard/hazard-foundry-summons/blob/master/README.md",
 	"url": "https://github.com/chuckhazard/hazard-foundry-summons",
 	"changelog": "https://github.com/chuckhazard/hazard-foundry-summons/releases/latest/"
