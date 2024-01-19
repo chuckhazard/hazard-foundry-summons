@@ -2,8 +2,6 @@
 
 <script>
 	import * as columnDefs from './columns/index.js';
-	import Header from './Header.svelte';
-	import Row from './Row.svelte';
 	import FilterGroup from './FilterGroup.svelte';
 	import Filters from './Filters.svelte';
 	import { ApplicationShell } from '@typhonjs-fvtt/runtime/svelte/component/core';
@@ -259,43 +257,83 @@
 				<input type="text" bind:value={$search} />
 			</div>
 
-			<div class="creatures">
-				<table>
-					<Header columns={data.columns} {sort} {localize} />
-					<tbody>
-						{#await data.creatures}
-							<tr><td colspan={data.columns.length + 1}><p>{localize('fs.menu.loading')}</p></td></tr>
-						{:then creatures}
-							{@const filteredCreatures = filterCreatures(
-								creatures,
-								$currentFilters,
-								$filterGroups,
-								$search,
-								$sort
-							)}
-							{#if filteredCreatures.length === 0}
-								<tr><td colspan={data.columns.length + 1}> <p>{localize('fs.menu.nothing')}</p></td></tr
-								>
+			<!-- <div class="creatures-wrapper" style="grid-template-columns: repeat({data.columns.length + 1}, 1fr);"> -->
+			<div
+				class="creatures"
+				style="grid-template-columns: repeat({data.columns.length}, minmax(0, max-content)) auto;"
+			>
+				<span class="header image">
+					{localize('fs.menu.headers.image')}
+				</span>
+				{#each data.columns as column, i}
+					<!-- svelte-ignore a11y-click-events-have-key-events -->
+					<span
+						class="header"
+						on:click={() => {
+							if (!column.compareFn) return;
+							if ($sort.column == column) $sort.reverse = !$sort.reverse;
+							else $sort.reverse = false;
+							$sort.column = column;
+						}}
+					>
+						{@html column.name}
+						<span class="sort-arrow" class:invisible={$sort.column != column}>
+							{#if $sort.reverse}
+								<i class="down arrow" />
 							{:else}
-								{#each filteredCreatures as opt}
-									<!-- svelte-ignore a11y-click-events-have-key-events -->
-									<tr
-										class="option"
-										class:selected={$creature?.id === opt.id}
-										on:click={() => ($creature = opt)}
-										on:dblclick={() => send() && application.close()}
-									>
-										<!-- svelte-ignore missing-declaration -->
-
-										<Row creature={opt} columns={data.columns} {openImage} />
-									</tr>
-								{/each}
+								<i class="up arrow" />
 							{/if}
-						{:catch error}
-							<p>{localize('fs.menu.error', { error: error.message })}</p>
-						{/await}
-					</tbody>
-				</table>
+						</span>
+					</span>
+				{/each}
+				<div class="scroll">
+					<!-- <Header columns={data.columns} {sort} {localize} /> -->
+					{#await data.creatures}
+						<span class="row">
+							<span class="cell"><p>{localize('fs.menu.loading')}</p></span>
+						</span>
+					{:then creatures}
+						{@const filteredCreatures = filterCreatures(
+							creatures,
+							$currentFilters,
+							$filterGroups,
+							$search,
+							$sort
+						)}
+						{#if filteredCreatures.length === 0}
+							<span class="row">
+								<span class="cell"><p>{localize('fs.menu.nothing')}</p></span>
+							</span>
+						{:else}
+							{#each filteredCreatures as opt}
+								<!-- svelte-ignore a11y-click-events-have-key-events -->
+								<span
+									class="row"
+									class:selected={$creature?.id === opt.id}
+									on:click={() => ($creature = opt)}
+									on:dblclick={() => send() && application.close()}
+								>
+									<span class="cell">
+										<img
+											src={opt.img}
+											alt={opt.name}
+											loading="lazy"
+											on:keypress={openImage(opt)}
+											on:click={openImage(opt)}
+										/>
+									</span>
+									{#each data.columns as column, i}
+										<span class="cell">
+											{@html column.value(opt)}
+										</span>
+									{/each}
+								</span>
+							{/each}
+						{/if}
+					{:catch error}
+						<p>{localize('fs.menu.error', { error: error.message })}</p>
+					{/await}
+				</div>
 			</div>
 		</div>
 	</main>
@@ -370,29 +408,51 @@
 	}
 
 	.creatures {
-		width: 100%;
-		overflow-y: scroll;
-		box-shadow: 0 0 0 0;
-		margin: 0;
+		overflow-x: hidden;
+		display: grid;
+		row-gap: 5px;
+		column-gap: 5px;
+		background-color: rgb(0, 0, 0, 0.1);
+		padding: 5px;
+		border-radius: 0.25rem;
+	}
+
+	.creatures .header {
+		align-items: center;
+		justify-content: center;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 2px;
+		list-style-type: none;
+		padding-left: 5px;
+	}
+
+	.creatures .scroll {
 		padding: 0;
+		margin: 0;
+		display: grid;
+		padding-right: 10px;
 		border-radius: 0;
+		grid-template-columns: subgrid;
+		grid-column: 1/-1;
 	}
 
-	.creatures table {
-		border-collapse: collapse; /* make the table borders collapse to each other */
-		width: 100%;
-		padding: 0;
-		margin: 0;
-	}
-
-	.option {
-		position: relative;
-		height: 100%;
-		box-shadow: revert;
+	.creatures .scroll .row {
+		display: grid;
+		grid-template-columns: subgrid;
+		grid-column: 1/-1;
 
 		&:hover {
 			box-shadow: inset 0 0 0 200px #006cc41c;
 		}
+	}
+
+	.creatures .scroll .row .cell {
+		align-items: center;
+		justify-content: center;
+		display: flex;
+		flex-wrap: wrap;
+		list-style-type: none;
 	}
 
 	.selected {
@@ -441,6 +501,50 @@
 				width: 100%;
 			}
 		}
+	}
+
+	.cell {
+	}
+
+	img {
+		clear: left;
+		float: left;
+		height: 100%;
+		width: 50px;
+		object-fit: cover;
+		object-position: top;
+
+		box-sizing: border-box;
+		border: 1px solid var(--color-border-dark);
+		border-radius: 2px;
+
+		&:hover {
+			box-shadow: inset 0 0 0 200px #0300c42c;
+		}
+	}
+
+	.invisible {
+		opacity: 0%;
+	}
+	.sort-arrow {
+		width: 5px;
+		padding: 5px;
+	}
+	.arrow {
+		border: solid black;
+		border-width: 0 3px 3px 0;
+		display: inline-block;
+		padding: 3px;
+	}
+
+	.up {
+		transform: rotate(-135deg);
+		-webkit-transform: rotate(-135deg);
+	}
+
+	.down {
+		transform: rotate(45deg);
+		-webkit-transform: rotate(45deg);
 	}
 
 	@import 'style/styles.css';
