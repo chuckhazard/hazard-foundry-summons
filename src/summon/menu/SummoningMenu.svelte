@@ -5,7 +5,7 @@
 	import FilterGroup from './FilterGroup.svelte';
 	import Filters from './Filters.svelte';
 	import { ApplicationShell } from '@typhonjs-fvtt/runtime/svelte/component/core';
-	import { writable } from 'svelte/store';
+	import { get, writable } from 'svelte/store';
 	import loadPacks from './loadPacks.js';
 	import { debug, localize, moduleID, deduplicate } from '../../utils.js';
 	import defaultFilters from './defaultFilters.js';
@@ -187,28 +187,48 @@
 	 */
 	function groupFilter(creatures, group) {
 		let filters = group.filters.filter((i) => !i.disabled);
-		if (filters.length) {
-			return creatures.filter((creature) => {
-				for (const filter of filters) {
-					if (!filter.disabled && filter.function(creature)) return true;
+		creatures.forEach((creature) => {
+			if (!creature.visible) return;
+			if (!filters) {
+				creature.visible = !group.filterWhenDisabled;
+				return;
+			}
+			for (const filter of filters) {
+				if (!filter.disabled && filter.function(creature)) {
+					creature.visible = true;
+					return;
 				}
-			});
-		}
-		return group.filterWhenDisabled ? [] : creatures;
+				creature.visible = false;
+			}
+		});
 	}
 
 	function filterCreatures(creatures, filters, filterGroups, search) {
-		let filtered = creatures.filter((x) => x.name.toLowerCase().includes(search.toLowerCase()));
+		creatures.forEach((creature) => {
+			if (search) {
+				if (creature.name.toLowerCase().includes(search.toLowerCase())) creature.visible = true;
+				else creature.visible = false;
+			} else creature.visible = true;
+		});
 
 		for (const group of filterGroups) {
-			filtered = groupFilter(filtered, group);
+			groupFilter(creatures, group);
 		}
 
+		let filtered = creatures;
 		filters
 			.filter((x) => !x.disabled || x.locked)
 			.forEach((filter) => {
 				filtered = filter.function(filtered);
+				creatures.forEach((creature) => {
+					if (!filtered.includes(creature)) creature.visible = false;
+				});
 			});
+
+		let selection = get(creature);
+		if (selection && !creatures.find((c) => c.id == selection?.id && c.visible)) {
+			creature.set(undefined);
+		}
 
 		if ($sort.reverse) return filtered.sort($sort.column.compareFn).reverse();
 		else return filtered.sort($sort.column.compareFn);
@@ -308,6 +328,7 @@
 							{#each filteredCreatures as opt}
 								<!-- svelte-ignore a11y-click-events-have-key-events -->
 								<span
+									class:none={!opt.visible}
 									class="row"
 									class:selected={$creature?.id === opt.id}
 									on:click={() => ($creature = opt)}
@@ -526,6 +547,15 @@
 	.invisible {
 		opacity: 0%;
 	}
+	.none {
+		display: none !important;
+		height: 0;
+	}
+	.none * {
+		display: none !important;
+		height: 0;
+	}
+
 	.sort-arrow {
 		width: 5px;
 		padding: 5px;
