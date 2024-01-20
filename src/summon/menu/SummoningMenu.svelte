@@ -91,7 +91,14 @@
 		data.filters = deduplicate(data.filters, (filter) => filter.name);
 	}
 
-	const token = writable(canvas.tokens.controlled[0] ?? data?.sourceTokens?.[0]);
+	// If caller provided an actor ID, find the matching token
+	if (data.summonerId) {
+		for (const t of data?.sourceTokens ?? []) {
+			if (t.document.actorId == data.summonerId) data.summoner = t;
+		}
+	}
+
+	const token = writable(data.summoner ?? canvas.tokens.controlled[0] ?? data?.sourceTokens?.[0]);
 	const creature = writable();
 	const currentFilters = writable(data.filters ?? []);
 	const filterGroups = writable(data.filterGroups ?? []);
@@ -256,14 +263,23 @@
 				</div>
 			{/if}
 
-			<div>
-				<label for="token">{localize('fs.menu.summonToken')}</label>
-				<select id="token" name="token" type="dropdown" placeholder="Select a Token" bind:value={$token}>
-					{#each data.sourceTokens as token}
-						<option value={token}>{token.name}</option>
-					{/each}
-				</select>
-			</div>
+			{#if !data.summoner}
+				<div>
+					<label for="token">{localize('fs.menu.summonToken')}</label>
+					<select id="token" name="token" type="dropdown" placeholder="Select a Token" bind:value={$token}>
+						{#each data.sourceTokens as token}
+							<option value={token}>{token.name}</option>
+						{/each}
+					</select>
+				</div>
+			{:else}
+				<div>
+					<label for="token">{localize('fs.menu.summonToken')}</label>
+					<select id="token" name="token" type="dropdown" placeholder="Select a Token" bind:value={$token}>
+						<option selected value={$token}>{$token.name}</option>
+					</select>
+				</div>
+			{/if}
 			<div>
 				{#if data.amount.locked}
 					<span class="fas fa-lock disabled" />
